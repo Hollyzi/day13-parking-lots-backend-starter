@@ -1,5 +1,6 @@
 package org.afs.pakinglot.controller;
 
+import org.afs.pakinglot.DTO.FetchCarRequest;
 import org.afs.pakinglot.domain.Car;
 import org.afs.pakinglot.domain.ParkingLotManager;
 import org.afs.pakinglot.domain.Ticket;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/parkinglotManager")
@@ -46,7 +48,16 @@ public class ParkinglotManagerController {
     }
 
     @PostMapping("/fetch")
-    public Car fetchCar(@RequestBody Ticket ticket) {
+    public Car fetchCar(@RequestBody FetchCarRequest fetchCarRequest) {
+        List<Ticket> tickets = parkingLotManager.getCars().values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        Ticket ticket = tickets.stream()
+                .filter(t -> t.plateNumber().equals(fetchCarRequest.getPlateNumber()))
+                .findFirst()
+                .orElse(null);
+
         return parkingLotManager.fetchCar(ticket);
     }
 }
