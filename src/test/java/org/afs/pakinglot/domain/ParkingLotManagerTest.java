@@ -1,5 +1,6 @@
 package org.afs.pakinglot.domain;
 
+import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
@@ -13,7 +14,7 @@ class ParkingLotManagerTest {
         Car car = new Car(CarPlateGenerator.generatePlate());
 
         // When
-        Ticket ticket = manager.parkCar(car);
+        Ticket ticket = manager.parkCar(car, new AvailableRateStrategy());
 
         // Then
         assertNotNull(ticket);
@@ -24,7 +25,7 @@ class ParkingLotManagerTest {
         // Given
         ParkingLotManager manager = new ParkingLotManager();
         Car car = new Car(CarPlateGenerator.generatePlate());
-        Ticket ticket = manager.parkCar(car);
+        Ticket ticket = manager.parkCar(car, new AvailableRateStrategy());
 
         // When
         Car fetchedCar = manager.fetchCar(ticket);
@@ -40,8 +41,8 @@ class ParkingLotManagerTest {
         ParkingLotManager manager = new ParkingLotManager();
         Car car1 = new Car(CarPlateGenerator.generatePlate());
         Car car2 = new Car(CarPlateGenerator.generatePlate());
-        manager.parkCar(car1);
-        manager.parkCar(car2);
+        manager.parkCar(car1, new AvailableRateStrategy());
+        manager.parkCar(car2, new AvailableRateStrategy());
 
         // When
         List<Car> cars = manager.getCars();

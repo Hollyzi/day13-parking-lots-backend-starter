@@ -29,12 +29,14 @@ public class ParkingLotManager {
         parkingBoys.add(new ParkingBoy(parkingLots, new SequentiallyStrategy()));
     }
 
-    public Ticket parkCar(Car car) {
+    public Ticket parkCar(Car car, ParkingStrategy strategy) {
         for (ParkingBoy parkingBoy : parkingBoys) {
+            if (parkingBoy.getParkingStrategy().getClass().equals(strategy.getClass())) {
             Ticket ticket = parkingBoy.park(car);
             if (ticket != null) {
                 return ticket;
             }
+        }
         }
         return null; // No available parking space
     }

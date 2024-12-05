@@ -1,6 +1,7 @@
 package org.afs.pakinglot.domain;
 
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,11 @@ public class ParkingLot {
 
     public ParkingLot(int id, String name, int capacity) {
         this.id = id;
+        this.name = name;
+        this.capacity = capacity;
+    }
+
+    public ParkingLot(String name, int capacity) {
         this.name = name;
         this.capacity = capacity;
     }
@@ -79,4 +85,7 @@ public class ParkingLot {
         return tickets.keySet().stream().toList();
     }
 
+    public Collection<Car> getCars() {
+        return tickets.values();
+    }
 }
