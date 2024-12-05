@@ -1,6 +1,6 @@
 package org.afs.pakinglot.controller;
 
-import org.afs.pakinglot.DTO.FetchCarRequest;
+import org.afs.pakinglot.DTO.CarRequest;
 import org.afs.pakinglot.domain.Car;
 import org.afs.pakinglot.domain.ParkingLotManager;
 import org.afs.pakinglot.domain.Ticket;
@@ -8,6 +8,7 @@ import org.afs.pakinglot.domain.strategies.ParkingStrategy;
 import org.afs.pakinglot.domain.strategies.SequentiallyStrategy;
 import org.afs.pakinglot.domain.strategies.MaxAvailableStrategy;
 import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +26,12 @@ public class ParkinglotManagerController {
     }
 
     @PostMapping("/park")
-    public Ticket parkCar(@RequestBody Car car, @RequestParam String strategy) {
+    public ResponseEntity<?> parkCar(@RequestBody CarRequest carRequest, @RequestParam String strategy) {
+        Car car=new CarRequest().toCar(carRequest);
+        if (car == null || !carRequest.getPlateNumber().matches("^[A-Z]{2}-\\d{4}$")) {
+            return ResponseEntity.badRequest().body("Invalid car format. Expected format is \"AA-1234\".");
+        }
+
         ParkingStrategy parkingStrategy;
         switch (strategy.toLowerCase()) {
             case "smart":
@@ -39,7 +45,7 @@ public class ParkinglotManagerController {
                 parkingStrategy = new SequentiallyStrategy();
                 break;
         }
-        return parkingLotManager.parkCar(car, parkingStrategy);
+        return ResponseEntity.ok(parkingLotManager.parkCar(car, parkingStrategy));
     }
 
     @GetMapping("/cars")
@@ -48,13 +54,13 @@ public class ParkinglotManagerController {
     }
 
     @PostMapping("/fetch")
-    public Car fetchCar(@RequestBody FetchCarRequest fetchCarRequest) {
+    public Car fetchCar(@RequestBody CarRequest carRequest) {
         List<Ticket> tickets = parkingLotManager.getCars().values().stream()
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
         Ticket ticket = tickets.stream()
-                .filter(t -> t.plateNumber().equals(fetchCarRequest.getPlateNumber()))
+                .filter(t -> t.plateNumber().equals(carRequest.getPlateNumber()))
                 .findFirst()
                 .orElse(null);
 
