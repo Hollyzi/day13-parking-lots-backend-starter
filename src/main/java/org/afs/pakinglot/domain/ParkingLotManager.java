@@ -23,9 +23,9 @@ public class ParkingLotManager {
         ParkingLot officeTowerParking = new ParkingLot(3,"Office Tower Parking", 9);
         parkingLots.add(officeTowerParking);
         // Initialize some cars in the parking lots
-        Ticket ticket1 = thePlazaPark.park(new Car("ABC123"));
-        Ticket ticket2 = cityMallGarage.park(new Car("XYZ789"));
-        Ticket ticket3 = officeTowerParking.park(new Car("LMN456"));
+        Ticket ticket1 = thePlazaPark.park(new Car("AB-1123"));
+        Ticket ticket2 = cityMallGarage.park(new Car("XY-1789"));
+        Ticket ticket3 = officeTowerParking.park(new Car("LM-1456"));
 
         parkingBoys = new ArrayList<>();
         parkingBoys.add(new ParkingBoy(parkingLots, new AvailableRateStrategy()));
