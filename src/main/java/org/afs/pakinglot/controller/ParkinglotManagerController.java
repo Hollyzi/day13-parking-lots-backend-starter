@@ -10,6 +10,7 @@ import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/parkinglotManager")
@@ -40,7 +41,7 @@ public class ParkinglotManagerController {
     }
 
     @GetMapping("/cars")
-    public List<Car> getCars() {
+    public Map<String, List<Ticket>> getCars() {
         return parkingLotManager.getCars();
     }
 

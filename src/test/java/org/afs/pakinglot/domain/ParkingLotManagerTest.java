@@ -2,7 +2,10 @@ package org.afs.pakinglot.domain;
 
 import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,11 +48,11 @@ class ParkingLotManagerTest {
         manager.parkCar(car2, new AvailableRateStrategy());
 
         // When
-        List<Car> cars = manager.getCars();
+        Map<String, List<Ticket>> carsMap = manager.getCars();
 
         // Then
-        assertEquals(2, cars.size());
-        assertTrue(cars.contains(car1));
-        assertTrue(cars.contains(car2));
+        assertEquals(2, carsMap.size());
+        assertTrue(carsMap.containsKey(car1));
+        assertTrue(carsMap.containsKey(car2));
     }
 }

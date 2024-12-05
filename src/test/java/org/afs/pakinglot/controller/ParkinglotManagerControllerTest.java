@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
+import java.util.Map;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.*;
@@ -37,7 +39,7 @@ public class ParkinglotManagerControllerTest {
     @BeforeEach
     public void setup() {
         car = new Car("ABC123");
-        ticket = new Ticket("ticket123", 1, 1);
+        ticket = new Ticket("ABC123", 1, 1);
     }
 
     @Test
@@ -90,15 +92,14 @@ public class ParkinglotManagerControllerTest {
 
     @Test
     public void shouldReturnAllCarsWhenGetCars() throws Exception {
-        Mockito.when(parkingLotManager.getCars()).thenReturn(Arrays.asList(car));
+        Mockito.when(parkingLotManager.getCars()).thenReturn(Map.of("The Plaza Park", Arrays.asList(ticket)));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/parkinglotManager/cars")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].plateNumber", is("ABC123")));
+                .andExpect(jsonPath("$.['The Plaza Park']", hasSize(1)))
+                .andExpect(jsonPath("$.['The Plaza Park'][0].plateNumber", is("ABC123")));
     }
-
     @Test
     public void shouldReturnCarWhenFetchCarWithValidTicket() throws Exception {
         Mockito.when(parkingLotManager.fetchCar(Mockito.any(Ticket.class))).thenReturn(car);
