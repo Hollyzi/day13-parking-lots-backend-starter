@@ -45,7 +45,7 @@ public class ParkinglotManagerControllerTest {
     @Test
     public void shouldReturnTicketWhenParkCarWithStandardStrategy() throws Exception {
         ParkingStrategy strategy = new SequentiallyStrategy();
-        Mockito.when(parkingLotManager.parkCar(Mockito.any(Car.class), Mockito.any(ParkingStrategy.class)))
+        Mockito.when(parkingLotManager.parkCar(Mockito.any(org.afs.pakinglot.DTO.CarRequest.class), Mockito.any(ParkingStrategy.class)))
                 .thenReturn(ticket);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/parkinglotManager/park")

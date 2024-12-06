@@ -1,5 +1,6 @@
 package org.afs.pakinglot.domain;
 
+import org.afs.pakinglot.DTO.CarRequest;
 import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.afs.pakinglot.domain.strategies.MaxAvailableStrategy;
 import org.afs.pakinglot.domain.strategies.ParkingStrategy;
@@ -33,7 +34,17 @@ public class ParkingLotManager {
         parkingBoys.add(new ParkingBoy(parkingLots, new SequentiallyStrategy()));
     }
 
-    public Ticket parkCar(Car car, ParkingStrategy strategy) {
+    public Ticket parkCar(CarRequest carRequest, ParkingStrategy strategy) {
+        // Check if the car's plate number already exists in the tickets
+        for (ParkingLot parkingLot : parkingLots) {
+            for (Ticket ticket : parkingLot.getTickets()) {
+                if (ticket.plateNumber().equals(carRequest.getPlateNumber())) {
+                    return null; // Car with this plate number already exists
+                }
+            }
+        }
+
+        Car car=new CarRequest().toCar(carRequest);
         for (ParkingBoy parkingBoy : parkingBoys) {
             if (parkingBoy.getParkingStrategy().getClass().equals(strategy.getClass())) {
                 Ticket ticket = parkingBoy.park(car);
@@ -45,13 +56,6 @@ public class ParkingLotManager {
         return null; // No available parking space
     }
 
-//    public List<Car> getCars() {
-//        List<Car> cars = new ArrayList<>();
-//        for (ParkingLot parkingLot : parkingLots) {
-//            cars.addAll(parkingLot.getCars());
-//        }
-//        return cars;
-//    }
     public Map<String, List<Ticket>> getCars() {
         Map<String, List<Ticket>> carsMap = new HashMap<>();
         for (ParkingLot parkingLot : parkingLots) {
