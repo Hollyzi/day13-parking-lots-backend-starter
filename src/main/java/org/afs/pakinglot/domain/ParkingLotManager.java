@@ -1,10 +1,12 @@
 package org.afs.pakinglot.domain;
 
 import org.afs.pakinglot.DTO.CarRequest;
+import org.afs.pakinglot.Exception.ExistException;
 import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.afs.pakinglot.domain.strategies.MaxAvailableStrategy;
 import org.afs.pakinglot.domain.strategies.ParkingStrategy;
 import org.afs.pakinglot.domain.strategies.SequentiallyStrategy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,6 +14,7 @@ import java.util.*;
 @Service
 public class ParkingLotManager {
 
+    public static final String CAR_EXISTS = "Car with this plate number already exists";
     private List<ParkingLot> parkingLots;
     private List<ParkingBoy> parkingBoys;
 
@@ -34,19 +37,34 @@ public class ParkingLotManager {
         parkingBoys.add(new ParkingBoy(parkingLots, new SequentiallyStrategy()));
     }
 
-    public Ticket parkCar(CarRequest carRequest, ParkingStrategy strategy) {
+    public Ticket parkCar(String plateNumber, String strategy) {
+        if (plateNumber == null || !plateNumber.matches("^[A-Z]{2}-\\d{4}$")) {
+            throw new IllegalArgumentException("Invalid plate number");
+        }
         // Check if the car's plate number already exists in the tickets
         for (ParkingLot parkingLot : parkingLots) {
             for (Ticket ticket : parkingLot.getTickets()) {
-                if (ticket.plateNumber().equals(carRequest.getPlateNumber())) {
-                    return null; // Car with this plate number already exists
+                if (ticket.plateNumber().equals(plateNumber)) {
+                    throw new ExistException(CAR_EXISTS);
                 }
             }
         }
-
-        Car car=new CarRequest().toCar(carRequest);
+        Car car = new Car(plateNumber);
+        ParkingStrategy parkingStrategy;
+        switch (strategy.toLowerCase()) {
+            case "smart":
+                parkingStrategy = new MaxAvailableStrategy();
+                break;
+            case "supersmart":
+                parkingStrategy = new AvailableRateStrategy();
+                break;
+            case "standard":
+            default:
+                parkingStrategy = new SequentiallyStrategy();
+                break;
+        }
         for (ParkingBoy parkingBoy : parkingBoys) {
-            if (parkingBoy.getParkingStrategy().getClass().equals(strategy.getClass())) {
+            if (parkingBoy.getParkingStrategy().getClass().equals(parkingStrategy.getClass())) {
                 Ticket ticket = parkingBoy.park(car);
                 if (ticket != null) {
                     return ticket;

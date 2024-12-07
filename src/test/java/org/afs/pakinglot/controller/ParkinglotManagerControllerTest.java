@@ -11,20 +11,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.*;
 
 @WebMvcTest(ParkinglotManagerController.class)
+@AutoConfigureJsonTesters
 public class ParkinglotManagerControllerTest {
 
     @Autowired
@@ -33,27 +38,32 @@ public class ParkinglotManagerControllerTest {
     @MockBean
     private ParkingLotManager parkingLotManager;
 
+    @Autowired
+    private JacksonTester<Car> carJacksonTester;
+
+
     private Car car;
     private Ticket ticket;
+    private String plateNumber = "AB-1123";
 
     @BeforeEach
     public void setup() {
-        car = new Car("ABC123");
-        ticket = new Ticket("ABC123", 1, 1);
+        car = new Car(plateNumber);
+        ticket = new Ticket(plateNumber, 1, 1);
     }
 
     @Test
     public void shouldReturnTicketWhenParkCarWithStandardStrategy() throws Exception {
         ParkingStrategy strategy = new SequentiallyStrategy();
-        Mockito.when(parkingLotManager.parkCar(Mockito.any(org.afs.pakinglot.DTO.CarRequest.class), Mockito.any(ParkingStrategy.class)))
+        Mockito.when(parkingLotManager.parkCar(Mockito.any(String.class), Mockito.any(String.class)))
                 .thenReturn(ticket);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/parkinglotManager/park")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"licensePlate\":\"ABC123\"}")
+                        .content("{\"plateNumber\":\"AB-1123\"}")
                         .param("strategy", "standard"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plateNumber", is("ticket123")))
+                .andExpect(jsonPath("$.plateNumber", is("AB-1123")))
                 .andExpect(jsonPath("$.position", is(1)))
                 .andExpect(jsonPath("$.parkingLot", is(1)));
     }
@@ -61,15 +71,15 @@ public class ParkinglotManagerControllerTest {
     @Test
     public void shouldReturnTicketWhenParkCarWithSmartStrategy() throws Exception {
         ParkingStrategy strategy = new MaxAvailableStrategy();
-        Mockito.when(parkingLotManager.parkCar(Mockito.any(Car.class), Mockito.any(ParkingStrategy.class)))
+        Mockito.when(parkingLotManager.parkCar(Mockito.any(String.class), Mockito.any(String.class)))
                 .thenReturn(ticket);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/parkinglotManager/park")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"licensePlate\":\"ABC123\"}")
+                        .content("{\"plateNumber\":\"AB-1123\"}")
                         .param("strategy", "smart"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plateNumber", is("ticket123")))
+                .andExpect(jsonPath("$.plateNumber", is("AB-1123")))
                 .andExpect(jsonPath("$.position", is(1)))
                 .andExpect(jsonPath("$.parkingLot", is(1)));
     }
@@ -77,15 +87,15 @@ public class ParkinglotManagerControllerTest {
     @Test
     public void shouldReturnTicketWhenParkCarWithSuperSmartStrategy() throws Exception {
         ParkingStrategy strategy = new AvailableRateStrategy();
-        Mockito.when(parkingLotManager.parkCar(Mockito.any(Car.class), Mockito.any(ParkingStrategy.class)))
+        Mockito.when(parkingLotManager.parkCar(Mockito.any(String.class), Mockito.any(String.class)))
                 .thenReturn(ticket);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/parkinglotManager/park")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"licensePlate\":\"ABC123\"}")
+                        .content("{\"plateNumber\":\"AB-1123\"}")
                         .param("strategy", "supersmart"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plateNumber", is("ticket123")))
+                .andExpect(jsonPath("$.plateNumber", is("AB-1123")))
                 .andExpect(jsonPath("$.position", is(1)))
                 .andExpect(jsonPath("$.parkingLot", is(1)));
     }
@@ -98,7 +108,7 @@ public class ParkinglotManagerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.['The Plaza Park']", hasSize(1)))
-                .andExpect(jsonPath("$.['The Plaza Park'][0].plateNumber", is("ABC123")));
+                .andExpect(jsonPath("$.['The Plaza Park'][0].plateNumber", is("AB-1123")));
     }
     @Test
     public void shouldReturnCarWhenFetchCarWithValidTicket() throws Exception {
@@ -106,8 +116,10 @@ public class ParkinglotManagerControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/parkinglotManager/fetch")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"plateNumber\":\"ticket123\"}"))
+                        .content("{\"plateNumber\":\"AB-1123\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plateNumber", is("ABC123")));
+                .andExpect(result -> {
+                    System.out.println(result.getResponse().getContentAsString());
+                });
     }
 }

@@ -1,5 +1,6 @@
 package org.afs.pakinglot.domain;
 
+import org.afs.pakinglot.DTO.CarRequest;
 import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.junit.jupiter.api.Test;
 
@@ -14,10 +15,8 @@ class ParkingLotManagerTest {
     void should_return_ticket_when_parkCar_then_ticketIsReturned() {
         // Given
         ParkingLotManager manager = new ParkingLotManager();
-        Car car = new Car(CarPlateGenerator.generatePlate());
-
-        // When
-        Ticket ticket = manager.parkCar(car, new AvailableRateStrategy());
+        String plateNumber = CarPlateGenerator.generatePlate();
+        Ticket ticket = manager.parkCar(plateNumber, "supersmart");
 
         // Then
         assertNotNull(ticket);
@@ -27,32 +26,32 @@ class ParkingLotManagerTest {
     void should_return_car_when_fetchCar_then_carIsReturned() {
         // Given
         ParkingLotManager manager = new ParkingLotManager();
-        Car car = new Car(CarPlateGenerator.generatePlate());
-        Ticket ticket = manager.parkCar(car, new AvailableRateStrategy());
+        String plateNumber = CarPlateGenerator.generatePlate();
+        Ticket ticket = manager.parkCar(plateNumber, "supersmart");
 
         // When
         Car fetchedCar = manager.fetchCar(ticket);
 
         // Then
         assertNotNull(fetchedCar);
-        assertEquals(car, fetchedCar);
+        assertEquals(plateNumber, fetchedCar.plateNumber());
     }
 
     @Test
     void should_return_all_parked_cars_when_getCars_then_all_parked_cars_are_returned() {
         // Given
         ParkingLotManager manager = new ParkingLotManager();
-        Car car1 = new Car(CarPlateGenerator.generatePlate());
-        Car car2 = new Car(CarPlateGenerator.generatePlate());
-        manager.parkCar(car1, new AvailableRateStrategy());
-        manager.parkCar(car2, new AvailableRateStrategy());
+        String plateNumber1 = CarPlateGenerator.generatePlate();
+        String plateNumber2 = CarPlateGenerator.generatePlate();
+        manager.parkCar(plateNumber1, "supersmart");
+        manager.parkCar(plateNumber2, "supersmart");
 
         // When
         Map<String, List<Ticket>> carsMap = manager.getCars();
 
         // Then
-        assertEquals(2, carsMap.size());
-        assertTrue(carsMap.containsKey(car1));
-        assertTrue(carsMap.containsKey(car2));
+        assertEquals(3, carsMap.size());
+        assertTrue(carsMap.values().stream().flatMap(List::stream).anyMatch(ticket -> ticket.plateNumber().equals(plateNumber1)));
+        assertTrue(carsMap.values().stream().flatMap(List::stream).anyMatch(ticket -> ticket.plateNumber().equals(plateNumber2)));
     }
 }

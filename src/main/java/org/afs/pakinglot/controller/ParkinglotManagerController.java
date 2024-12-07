@@ -27,24 +27,7 @@ public class ParkinglotManagerController {
 
     @PostMapping("/park")
     public ResponseEntity<?> parkCar(@RequestBody CarRequest carRequest, @RequestParam String strategy) {
-        if (carRequest == null || !carRequest.getPlateNumber().matches("^[A-Z]{2}-\\d{4}$")) {
-            return ResponseEntity.badRequest().body("Invalid car format. Expected format is \"AA-1234\".");
-        }
-
-        ParkingStrategy parkingStrategy;
-        switch (strategy.toLowerCase()) {
-            case "smart":
-                parkingStrategy = new MaxAvailableStrategy();
-                break;
-            case "supersmart":
-                parkingStrategy = new AvailableRateStrategy();
-                break;
-            case "standard":
-            default:
-                parkingStrategy = new SequentiallyStrategy();
-                break;
-        }
-        return ResponseEntity.ok(parkingLotManager.parkCar(carRequest, parkingStrategy));
+        return ResponseEntity.ok(parkingLotManager.parkCar(carRequest.getPlateNumber(), strategy));
     }
 
     @GetMapping("/cars")

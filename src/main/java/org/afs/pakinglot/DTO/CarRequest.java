@@ -4,6 +4,11 @@ import org.afs.pakinglot.domain.Car;
 
 public class CarRequest {
     private String plateNumber;
+    public CarRequest() {
+    }
+    public CarRequest(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
 
     public String getPlateNumber() {
         return plateNumber;
