@@ -12,4 +12,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleExistException(ExistException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
-}
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleExistException(IllegalArgumentException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }}
