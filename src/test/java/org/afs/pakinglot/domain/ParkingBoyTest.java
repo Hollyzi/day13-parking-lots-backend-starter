@@ -53,7 +53,7 @@ class ParkingBoyTest {
         ParkingLot parkingLot2 = new ParkingLot();
         parkingLot1.park(new Car(CarPlateGenerator.generatePlate()));
         parkingLot2.park(new Car(CarPlateGenerator.generatePlate()));
-        Ticket wrongTicket = new Ticket(CarPlateGenerator.generatePlate(), 1, 1 );
+        Ticket wrongTicket = new Ticket(CarPlateGenerator.generatePlate(), 1, 1,null, null);
         ParkingBoy parkingBoy = new ParkingBoy(List.of(parkingLot1, parkingLot2));
         // When
         // Then

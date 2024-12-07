@@ -1,4 +1,6 @@
 package org.afs.pakinglot.domain;
 
-public record Ticket(String plateNumber, int position, int parkingLot) {
+import java.time.LocalDateTime;
+
+public record Ticket(String plateNumber, int position, int parkingLot, LocalDateTime entryTime, LocalDateTime exitTime) {
 }
