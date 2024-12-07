@@ -30,7 +30,7 @@ class ParkingLotManagerTest {
         Ticket ticket = manager.parkCar(plateNumber, "supersmart");
 
         // When
-        Car fetchedCar = manager.fetchCar(ticket);
+        Car fetchedCar = manager.fetchCar(ticket.plateNumber()).getCar();
 
         // Then
         assertNotNull(fetchedCar);

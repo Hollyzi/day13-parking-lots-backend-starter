@@ -1,5 +1,6 @@
 package org.afs.pakinglot.controller;
 
+import org.afs.pakinglot.DTO.FetchCarResponse;
 import org.afs.pakinglot.domain.Car;
 import org.afs.pakinglot.domain.ParkingLotManager;
 import org.afs.pakinglot.domain.Ticket;
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -49,11 +52,11 @@ public class ParkinglotManagerControllerTest {
     @BeforeEach
     public void setup() {
         car = new Car(plateNumber);
-        ticket = new Ticket(plateNumber, 1, 1);
+        ticket = new Ticket(plateNumber, 1, 1, LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
-    public void shouldReturnTicketWhenParkCarWithStandardStrategy() throws Exception {
+    public void shouldReturn_Ticket_when_ParkCarWithStandardStrategy_then_Success() throws Exception {
         ParkingStrategy strategy = new SequentiallyStrategy();
         Mockito.when(parkingLotManager.parkCar(Mockito.any(String.class), Mockito.any(String.class)))
                 .thenReturn(ticket);
@@ -69,7 +72,7 @@ public class ParkinglotManagerControllerTest {
     }
 
     @Test
-    public void shouldReturnTicketWhenParkCarWithSmartStrategy() throws Exception {
+    public void shouldReturn_Ticket_when_ParkCarWithSmartStrategy_then_Success() throws Exception {
         ParkingStrategy strategy = new MaxAvailableStrategy();
         Mockito.when(parkingLotManager.parkCar(Mockito.any(String.class), Mockito.any(String.class)))
                 .thenReturn(ticket);
@@ -85,7 +88,7 @@ public class ParkinglotManagerControllerTest {
     }
 
     @Test
-    public void shouldReturnTicketWhenParkCarWithSuperSmartStrategy() throws Exception {
+    public void shouldReturn_Ticket_when_ParkCarWithSuperSmartStrategy_then_Success() throws Exception {
         ParkingStrategy strategy = new AvailableRateStrategy();
         Mockito.when(parkingLotManager.parkCar(Mockito.any(String.class), Mockito.any(String.class)))
                 .thenReturn(ticket);
@@ -101,7 +104,7 @@ public class ParkinglotManagerControllerTest {
     }
 
     @Test
-    public void shouldReturnAllCarsWhenGetCars() throws Exception {
+    public void shouldReturn_AllCars_when_GetCars_then_Success() throws Exception {
         Mockito.when(parkingLotManager.getCars()).thenReturn(Map.of("The Plaza Park", Arrays.asList(ticket)));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/parkinglotManager/cars")
@@ -110,16 +113,29 @@ public class ParkinglotManagerControllerTest {
                 .andExpect(jsonPath("$.['The Plaza Park']", hasSize(1)))
                 .andExpect(jsonPath("$.['The Plaza Park'][0].plateNumber", is("AB-1123")));
     }
+
     @Test
-    public void shouldReturnCarWhenFetchCarWithValidTicket() throws Exception {
-        Mockito.when(parkingLotManager.fetchCar(Mockito.any(Ticket.class))).thenReturn(car);
+    public void shouldReturn_Car_when_FetchCarWithValidTicket_then_Success() throws Exception {
+        Mockito.when(parkingLotManager.fetchCar(Mockito.any(String.class))).thenReturn(new FetchCarResponse(car, LocalDateTime.now(), LocalDateTime.now(), "0 hours 1 minutes", 4.0));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/parkinglotManager/fetch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"plateNumber\":\"AB-1123\"}"))
                 .andExpect(status().isOk())
-                .andExpect(result -> {
-                    System.out.println(result.getResponse().getContentAsString());
-                });
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.car.plateNumber", is("AB-1123")))
+                .andExpect(jsonPath("$.parkingFees", is(4.0)));
+    }
+
+    @Test
+    public void shouldCalculate_ParkingFeesCorrectly_when_GivenDuration_then_Success() {
+        LocalDateTime entryTime = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime exitTime = LocalDateTime.now();
+        Duration duration = Duration.between(entryTime, exitTime);
+        ParkingLotManager.Result result = new ParkingLotManager.Result(entryTime, exitTime, duration, new StringBuilder("0 hours 16 minutes"));
+
+        double parkingFees = ParkingLotManager.getParkingFees(result);
+
+        assertEquals(4.0, parkingFees);
     }
 }
