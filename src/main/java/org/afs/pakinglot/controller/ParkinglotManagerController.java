@@ -1,6 +1,7 @@
 package org.afs.pakinglot.controller;
 
 import org.afs.pakinglot.DTO.CarRequest;
+import org.afs.pakinglot.DTO.FetchCarResponse;
 import org.afs.pakinglot.domain.Car;
 import org.afs.pakinglot.domain.ParkingLotManager;
 import org.afs.pakinglot.domain.Ticket;
@@ -36,16 +37,7 @@ public class ParkinglotManagerController {
     }
 
     @PostMapping("/fetch")
-    public Car fetchCar(@RequestBody CarRequest carRequest) {
-        List<Ticket> tickets = parkingLotManager.getCars().values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-
-        Ticket ticket = tickets.stream()
-                .filter(t -> t.plateNumber().equals(carRequest.getPlateNumber()))
-                .findFirst()
-                .orElse(null);
-
-        return parkingLotManager.fetchCar(ticket);
+    public FetchCarResponse fetchCar(@RequestBody CarRequest carRequest) {
+        return parkingLotManager.fetchCar(carRequest.getPlateNumber());
     }
 }

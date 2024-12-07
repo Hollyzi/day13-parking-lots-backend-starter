@@ -1,14 +1,15 @@
 package org.afs.pakinglot.domain;
 
-import org.afs.pakinglot.DTO.CarRequest;
+import org.afs.pakinglot.DTO.FetchCarResponse;
 import org.afs.pakinglot.Exception.ExistException;
 import org.afs.pakinglot.domain.strategies.AvailableRateStrategy;
 import org.afs.pakinglot.domain.strategies.MaxAvailableStrategy;
 import org.afs.pakinglot.domain.strategies.ParkingStrategy;
 import org.afs.pakinglot.domain.strategies.SequentiallyStrategy;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -82,14 +83,53 @@ public class ParkingLotManager {
         return carsMap;
     }
 
-
-    public Car fetchCar(Ticket ticket) {
-        for (ParkingBoy parkingBoy : parkingBoys) {
-            Car car = parkingBoy.fetch(ticket);
-            if (car != null) {
-                return car;
+    public FetchCarResponse fetchCar(String  plateNumber) {
+        Ticket fetchTicket=null;
+        Car car=null;
+        for (ParkingLot parkingLot : parkingLots) {
+            for (Ticket ticket : parkingLot.getTickets()) {
+                if (ticket.plateNumber().equals(plateNumber)) {
+                    fetchTicket=ticket;
+                }
             }
         }
-        return null; // Car not found
+        for (ParkingBoy parkingBoy : parkingBoys) {
+            car = parkingBoy.fetch(fetchTicket);
+            if (car != null) {
+                break;
+            }
+            return null;
+        }
+        Result parkingTimeInformation = getParkingTimeInformation(fetchTicket);
+        // Calculate parking fees
+        double parkingFees = getParkingFees(parkingTimeInformation);
+        return new FetchCarResponse(car, parkingTimeInformation.entryTime(), parkingTimeInformation.exitTime(), parkingTimeInformation.durationString().toString(),parkingFees);
+    }
+
+    public static double getParkingFees(Result parkingTimeInformation) {
+        long totalMinutes = parkingTimeInformation.duration().toMinutes();
+        double parkingFees = Math.ceil((totalMinutes + 1) / 15.0) * 4;
+        return parkingFees;
+    }
+
+    private static Result getParkingTimeInformation(Ticket fetchTicket) {
+        LocalDateTime entryTime = fetchTicket.entryTime();
+        LocalDateTime exitTime = LocalDateTime.now();
+        Duration duration = Duration.between(entryTime, exitTime);
+
+        long days = duration.toDays();
+        long hours = duration.toHours() % 24;
+        long minutes = duration.toMinutes() % 60;
+
+        StringBuilder durationString = new StringBuilder();
+        if (days > 0) {
+            durationString.append(days).append(" days + ");
+        }
+        durationString.append(hours).append(" hours ").append(minutes).append(" minutes");
+        Result result = new Result(entryTime, exitTime, duration, durationString);
+        return result;
+    }
+
+    public record Result(LocalDateTime entryTime, LocalDateTime exitTime, Duration duration, StringBuilder durationString) {
     }
 }

@@ -1,6 +1,6 @@
 package org.afs.pakinglot.domain;
 
-
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ public class ParkingLot {
             throw new NoAvailablePositionException();
         }
 
-        Ticket ticket = new Ticket(car.plateNumber(), tickets.size() + 1, this.id);
+        Ticket ticket = new Ticket(car.plateNumber(), tickets.size() + 1, this.id, LocalDateTime.now(), null);
         tickets.put(ticket, car);
         return ticket;
     }
@@ -61,7 +61,6 @@ public class ParkingLot {
         if (!tickets.containsKey(ticket)) {
             throw new UnrecognizedTicketException();
         }
-
         return tickets.remove(ticket);
     }
 

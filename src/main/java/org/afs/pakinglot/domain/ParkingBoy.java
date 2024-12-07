@@ -30,10 +30,11 @@ public class ParkingBoy {
 
     public Car fetch(Ticket ticket) {
         ParkingLot parkingLotOfTheTicket = parkingLots.stream()
-            .filter(parkingLot -> parkingLot.contains(ticket))
-            .findFirst()
-            .orElseThrow(UnrecognizedTicketException::new);
-        return parkingLotOfTheTicket.fetch(ticket);
+                .filter(parkingLot -> parkingLot.contains(ticket))
+                .findFirst()
+                .orElseThrow(UnrecognizedTicketException::new);
+        Car car = parkingLotOfTheTicket.fetch(ticket);
+        return car;
     }
 
     public ParkingStrategy getParkingStrategy() {
