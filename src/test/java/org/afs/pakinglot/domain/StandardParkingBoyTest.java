@@ -57,7 +57,7 @@ class StandardParkingBoyTest {
         // Given
         ParkingLot parkingLot = new ParkingLot();
         ParkingBoy parkingBoy = new ParkingBoy(parkingLot);
-        Ticket wrongTicket = new Ticket(CarPlateGenerator.generatePlate(), 1, 1);
+        Ticket wrongTicket = new Ticket(CarPlateGenerator.generatePlate(), 1, 1, null, null);
         // When
         // Then
         UnrecognizedTicketException exception =

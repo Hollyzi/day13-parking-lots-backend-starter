@@ -108,11 +108,11 @@ public class ParkingLotManager {
 
     public static double getParkingFees(Result parkingTimeInformation) {
         long totalMinutes = parkingTimeInformation.duration().toMinutes();
-        double parkingFees = Math.ceil((totalMinutes + 1) / 15.0) * 4;
+        double parkingFees = Math.ceil(totalMinutes / 15.0) * 4;
         return parkingFees;
     }
 
-    private static Result getParkingTimeInformation(Ticket fetchTicket) {
+    public static Result getParkingTimeInformation(Ticket fetchTicket) {
         LocalDateTime entryTime = fetchTicket.entryTime();
         LocalDateTime exitTime = LocalDateTime.now();
         Duration duration = Duration.between(entryTime, exitTime);
